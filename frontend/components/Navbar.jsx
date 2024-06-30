@@ -41,8 +41,9 @@ const Navbar = () => {
           <img src={avatarUrl} alt="Avatar" style={{ width: 45 }} />
         )}
         {/* </Link> */}
-
+<div className=" ml-3">
         <ConnectButton />
+</div>
         {/* <WalletActionButton>
           {!connected ? "Connect Tron" : null}
         </WalletActionButton> */}

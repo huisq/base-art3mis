@@ -5,7 +5,7 @@ import Navbar from "../../components/Navbar";
 import { useWallet } from '@tronweb3/tronwallet-adapter-react-hooks';
 import React, { useEffect, useState } from 'react';
 import { useAccount, useContract, useProvider, useSigner } from 'wagmi';
-import { useReadContract } from 'wagmi'
+import { useReadContract, useWriteContract } from 'wagmi'
 import { ethers } from 'ethers';
 
 export default function Home() {
@@ -19,8 +19,8 @@ export default function Home() {
   const [mintdone, setmintdone] = useState(false);
   const { isConnected: connected, address } = useAccount()
   const [contractResult, setContractResult] = useState(null);
+  const { data: hash, error, isPending, writeContract } = useWriteContract()
 
-  const contractAddress = '0x6d9055be44BbF7DBFb14272A582A34Af7Bb9F295';
   const contractABI = [
     {
       "inputs": [],
@@ -551,7 +551,7 @@ export default function Home() {
     }
   ];
   const CONTRACT_ADDRESS = '0x6d9055be44BbF7DBFb14272A582A34Af7Bb9F295'
-  const { data:result, error: errorName, isPending: isPendingName,refetch } = useReadContract({
+  const { data: result, error: errorName, isPending: isPendingName, refetch } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: contractABI,
     functionName: 'drawCard',
@@ -563,9 +563,20 @@ export default function Home() {
     setContractResult(result); // 设置结果
     setLoading(false);
   };
+  const { data: tokenId,refetch:refetchToken } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: contractABI,
+    functionName: 'getCurrentTokenId',
+    enabled: false, // 禁用自动读取
+  })
+  const getToken = async () => {
+    await refetchToken(); // 重新读取合约数据
+  };
+
+
   const handleDrawCardAndFetchreading = async () => {
     setLoading(true);
-    
+
     try {
       getDrawCardAndFetchReading()
       console.log("abi result", result);
@@ -605,7 +616,7 @@ export default function Home() {
         headers: headers,
         body: JSON.stringify(requestBody),
       });
-      console.log('0---===---000',readingResponse)
+      console.log('0---===---000', readingResponse)
 
 
       if (!readingResponse.ok) {
@@ -629,15 +640,15 @@ export default function Home() {
 
     try {
 
-      let abi = { "entrys": [{ "stateMutability": "Nonpayable", "type": "Constructor" }, { "inputs": [{ "indexed": true, "name": "owner", "type": "address" }, { "indexed": true, "name": "approved", "type": "address" }, { "indexed": true, "name": "tokenId", "type": "uint256" }], "name": "Approval", "type": "Event" }, { "inputs": [{ "indexed": true, "name": "owner", "type": "address" }, { "indexed": true, "name": "operator", "type": "address" }, { "name": "approved", "type": "bool" }], "name": "ApprovalForAll", "type": "Event" }, { "inputs": [{ "name": "card_drawn", "type": "string" }], "name": "CardsDrawn", "type": "Event" }, { "inputs": [{ "indexed": true, "name": "from", "type": "address" }, { "indexed": true, "name": "to", "type": "address" }, { "indexed": true, "name": "tokenId", "type": "uint256" }], "name": "Transfer", "type": "Event" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "MAJOR_ARCANA_URI", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "address" }], "constant": true, "name": "Owner", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "uint256" }], "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "baseURI", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "drawCards", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "uint256" }], "constant": true, "name": "getCurrentTokenId", "stateMutability": "View", "type": "Function" }, { "payable": true, "inputs": [{ "name": "to", "type": "address" }, { "name": "tokenURI", "type": "string" }], "name": "mintReading", "stateMutability": "Payable", "type": "Function" }, { "outputs": [{ "type": "bool" }], "inputs": [{ "name": "to", "type": "address" }, { "name": "tokenId", "type": "uint256" }, { "name": "tokenURI", "type": "string" }], "name": "mintWithTokenURI", "stateMutability": "Nonpayable", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "name", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "address" }], "constant": true, "inputs": [{ "name": "tokenId", "type": "uint256" }], "name": "ownerOf", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "symbol", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "inputs": [{ "name": "tokenId", "type": "uint256" }], "name": "tokenURI", "stateMutability": "View", "type": "Function" }, { "inputs": [{ "name": "_amount", "type": "uint256" }], "name": "withdraw", "stateMutability": "Nonpayable", "type": "Function" }] };
+      // let abi = { "entrys": [{ "stateMutability": "Nonpayable", "type": "Constructor" }, { "inputs": [{ "indexed": true, "name": "owner", "type": "address" }, { "indexed": true, "name": "approved", "type": "address" }, { "indexed": true, "name": "tokenId", "type": "uint256" }], "name": "Approval", "type": "Event" }, { "inputs": [{ "indexed": true, "name": "owner", "type": "address" }, { "indexed": true, "name": "operator", "type": "address" }, { "name": "approved", "type": "bool" }], "name": "ApprovalForAll", "type": "Event" }, { "inputs": [{ "name": "card_drawn", "type": "string" }], "name": "CardsDrawn", "type": "Event" }, { "inputs": [{ "indexed": true, "name": "from", "type": "address" }, { "indexed": true, "name": "to", "type": "address" }, { "indexed": true, "name": "tokenId", "type": "uint256" }], "name": "Transfer", "type": "Event" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "MAJOR_ARCANA_URI", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "address" }], "constant": true, "name": "Owner", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "uint256" }], "constant": true, "inputs": [{ "name": "owner", "type": "address" }], "name": "balanceOf", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "baseURI", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "drawCards", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "uint256" }], "constant": true, "name": "getCurrentTokenId", "stateMutability": "View", "type": "Function" }, { "payable": true, "inputs": [{ "name": "to", "type": "address" }, { "name": "tokenURI", "type": "string" }], "name": "mintReading", "stateMutability": "Payable", "type": "Function" }, { "outputs": [{ "type": "bool" }], "inputs": [{ "name": "to", "type": "address" }, { "name": "tokenId", "type": "uint256" }, { "name": "tokenURI", "type": "string" }], "name": "mintWithTokenURI", "stateMutability": "Nonpayable", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "name", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "address" }], "constant": true, "inputs": [{ "name": "tokenId", "type": "uint256" }], "name": "ownerOf", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "name": "symbol", "stateMutability": "View", "type": "Function" }, { "outputs": [{ "type": "string" }], "constant": true, "inputs": [{ "name": "tokenId", "type": "uint256" }], "name": "tokenURI", "stateMutability": "View", "type": "Function" }, { "inputs": [{ "name": "_amount", "type": "uint256" }], "name": "withdraw", "stateMutability": "Nonpayable", "type": "Function" }] };
 
-      let contractmint = await tronWeb.contract(abi.entrys, 'TKwFErXfUzYGSnTrM6ryCRWj4i66S2UHeL');
+      // let contractmint = await tronWeb.contract(abi.entrys, 'TKwFErXfUzYGSnTrM6ryCRWj4i66S2UHeL');
 
-      const getCurrentTokenId = await contractmint["getCurrentTokenId"]().call();
+      // const getCurrentTokenId = await contractmint["getCurrentTokenId"]().call();
+      getToken()
+      console.log("getcurrenttoken", tokenId);
 
-      console.log("getcurrenttoken", getCurrentTokenId, getCurrentTokenId._hex);
-
-      const currentToken = ethers.formatEther(`${getCurrentTokenId._hex}`);
+      const currentToken = ethers.formatEther(`${tokenId.toString()}`);
 
       const jsontxt = {
         "title": "Asset Metadata",
@@ -660,14 +671,22 @@ export default function Home() {
 
       console.log("currentToken", currentToken, jsontxt);
 
-      let result = await contractmint["mintReading"](address, jsontxt).send(
-        {
-          feeLimit: 100_000_000,  // Fee limit for the transaction
-          callValue: tronWeb.toSun(10)          // Adjust call value if necessary
-        }
-      );
 
-      console.log("abi mint result", result);
+      writeContract({
+        address: CONTRACT_ADDRESS,
+        abi:contractABI,
+        functionName: 'mintReading',
+        args: [address, jsontxt]
+      })
+
+      // let result = await contractmint["mintReading"](address, jsontxt).send(
+      //   {
+      //     feeLimit: 100_000_000,  // Fee limit for the transaction
+      //     callValue: tronWeb.toSun(10)          // Adjust call value if necessary
+      //   }
+      // );
+
+      console.log("abi mint result", hash);
 
       setmintdone(true);
     } catch (error) {
@@ -768,13 +787,13 @@ export default function Home() {
                       Start Again
                     </button>
 
-                    {/* <button
-                 onClick={mintreading}
-                 className="rounded-full py-2 px-6 text-black font-semibold"
-                 style={{backgroundColor: "#E8C6AA"}}
-               >
-                 Mint reading
-               </button> */}
+                    <button
+                      onClick={mintreading}
+                      className="rounded-full py-2 px-6 text-black font-semibold"
+                      style={{ backgroundColor: "#E8C6AA" }}
+                    >
+                      Mint reading
+                    </button>
 
                   </div>
                   <h2 className="font-bold mb-2 text-black">
