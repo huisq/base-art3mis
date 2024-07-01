@@ -39,7 +39,7 @@ export default function RootLayout({
   const config = getDefaultConfig({
     appName: 'My RainbowKit App',
     projectId: 'YOUR_PROJECT_ID',
-    chains: [base,baseSepolia],
+    chains: [baseSepolia,base,],
     ssr: true, // If your dApp uses server side rendering (SSR)
   });
   return (
