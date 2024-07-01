@@ -561,9 +561,8 @@ export default function Home() {
     setLoading(true);
     await refetch(); // 重新读取合约数据
     setContractResult(result); // 设置结果
-    setLoading(false);
   };
-  const { data: tokenId,refetch:refetchToken } = useReadContract({
+  const { data: tokenId, refetch: refetchToken } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: contractABI,
     functionName: 'getCurrentTokenId',
@@ -618,7 +617,6 @@ export default function Home() {
       });
       console.log('0---===---000', readingResponse)
 
-
       if (!readingResponse.ok) {
         throw new Error("Failed to fetch reading");
       }
@@ -630,9 +628,11 @@ export default function Home() {
 
     } catch (error) {
       console.error("Error handling draw card and fetching reading:", error);
+      setLoading(false)
     } finally {
-      setLoading(false);
     }
+
+
   };
 
   const mintreading = async () => {
@@ -646,7 +646,6 @@ export default function Home() {
 
       // const getCurrentTokenId = await contractmint["getCurrentTokenId"]().call();
       getToken()
-      console.log("getcurrenttoken", tokenId);
 
       const currentToken = ethers.formatEther(`${tokenId.toString()}`);
 
@@ -674,7 +673,7 @@ export default function Home() {
 
       writeContract({
         address: CONTRACT_ADDRESS,
-        abi:contractABI,
+        abi: contractABI,
         functionName: 'mintReading',
         args: [address, jsontxt]
       })
@@ -755,7 +754,11 @@ export default function Home() {
               />
 
               <button
-                onClick={handleDrawCardAndFetchreading}
+                onClick={async () => {
+                  await handleDrawCardAndFetchreading()
+                  setLoading(false)
+                }
+                }
                 className="bg-white rounded-full py-3 px-20 text-black mt-4 uppercase" style={{ fontFamily: 'fantasy', backgroundColor: '#DACFE6' }}
               >
                 Ask
