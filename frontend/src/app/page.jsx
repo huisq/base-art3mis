@@ -706,6 +706,7 @@ export default function Home() {
             ? "url(/afterlogin.png)"
             : "url(/beforelogin.png)",
         backgroundPosition: "center",
+        backgroundSize: "cover",
         position: "relative",
         zIndex: 0,
       }}
